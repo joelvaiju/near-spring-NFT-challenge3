@@ -2,19 +2,20 @@ import 'regenerator-runtime/runtime'
 import React from 'react'
 import { login, logout } from './utils'
 import './global.css'
+const BN = require("bn.js");
 
 import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
 export default function App() {
-  // use React Hooks to store greeting in component state
-  const [greeting, set_greeting] = React.useState()
 
   // when the user has not yet interacted with the form, disable the button
-  const [buttonDisabled, setButtonDisabled] = React.useState(true)
+  const [buttonDisabled, setButtonDisabled] = React.useState(false)
 
   // after submitting the form, we want to show Notification
   const [showNotification, setShowNotification] = React.useState(false)
+
+  const [tokenData, setTokenData] = React.useState([])
 
   // The useEffect hook can be used to fire side-effects during render
   // Learn more: https://reactjs.org/docs/hooks-intro.html
@@ -24,9 +25,15 @@ export default function App() {
       if (window.walletConnection.isSignedIn()) {
 
         // window.contract is set by initContract in index.js
-        window.contract.get_greeting({ account_id: window.accountId })
-          .then(greetingFromContract => {
-            set_greeting(greetingFromContract)
+        window.contract.nft_tokens_for_owner({ account_id: window.accountId })
+          .then(response => {
+            console.log("res"+JSON.stringify(response));
+            setTokenData(...response)
+            if(response.length >0){
+              setButtonDisabled(true)
+               // show Notification
+              setShowNotification(true)
+            }
           })
       }
     },
@@ -37,14 +44,15 @@ export default function App() {
     []
   )
 
+
+
   // if not signed in, return early with sign-in prompt
   if (!window.walletConnection.isSignedIn()) {
     return (
       <main>
-        <h1>Welcome to NEAR!</h1>
+        <h1>Welcome to NEAR NFT!</h1>
         <p>
-          To make use of the NEAR blockchain, you need to sign in. The button
-          below will sign you in using NEAR Wallet.
+          To Mint your NFT you need to sign in using NEAR wallet first
         </p>
         <p>
           Go ahead and click the button below to try it out:
@@ -71,29 +79,40 @@ export default function App() {
               borderBottom: '2px solid var(--secondary)'
             }}
           >
-            {greeting}
+            Welcome
           </label>
           {' '/* React trims whitespace around tags; insert literal space character when needed */}
           {window.accountId}!
         </h1>
+        <div >
+          <img src="https://nftnewspro.com/wp-content/uploads/2022/03/Disaster-Girl.jpg" width="550" height="400" />
+        </div>
         <form onSubmit={async event => {
           event.preventDefault()
 
-          // get elements from the form using their id attribute
-          const { fieldset, greeting } = event.target.elements
-
-          // hold onto new user-entered value from React's SynthenticEvent for use after `await` call
-          const newGreeting = greeting.value
-
+          
           // disable the form while the value gets updated on-chain
           fieldset.disabled = true
 
           try {
             // make an update call to the smart contract
-            await window.contract.set_greeting({
-              // pass the value that the user entered in the greeting field
-              message: newGreeting
-            })
+            await window.contract.nft_mint({
+
+              
+                token_id: `${window.accountId}-Near-Spring-token`,
+                metadata: {
+                  title: "NEAR SPRING NFT",
+                  description: "NEAR Spring Challenge 3 NFT :)",
+                  media:
+                    "https://bafkreifdhr7zejvzp2gls3dh53a4fwu6hjbio3k6k2ithcllovop2oykhq.ipfs.nftstorage.link/",
+                },
+                receiver_id: window.accountId,
+              },
+              300000000000000, // attached GAS (optional)
+              new BN("1000000000000000000000000")
+
+            )
+
           } catch (e) {
             alert(
               'Something went wrong! ' +
@@ -106,11 +125,8 @@ export default function App() {
             fieldset.disabled = false
           }
 
-          // update local `greeting` variable to match persisted value
-          set_greeting(newGreeting)
-
-          // show Notification
-          setShowNotification(true)
+         
+         
 
           // remove Notification again after css animation completes
           // this allows it to be shown again next time the form is submitted
@@ -119,29 +135,18 @@ export default function App() {
           }, 11000)
         }}>
           <fieldset id="fieldset">
-            <label
-              htmlFor="greeting"
-              style={{
-                display: 'block',
-                color: 'var(--gray)',
-                marginBottom: '0.5em'
-              }}
+            <h4
+              
             >
-              Change greeting
-            </label>
-            <div style={{ display: 'flex' }}>
-              <input
-                autoComplete="off"
-                defaultValue={greeting}
-                id="greeting"
-                onChange={e => setButtonDisabled(e.target.value === greeting)}
-                style={{ flex: 1 }}
-              />
+              Click the Below Button to MINT YOUR NFT
+            </h4>
+            <div style={{ display: 'flex', alignContent: 'center', justifyContent:'center' }}>
+              
               <button
                 disabled={buttonDisabled}
                 style={{ borderRadius: '0 5px 5px 0' }}
               >
-                Save
+                MINT
               </button>
             </div>
           </fieldset>
@@ -157,20 +162,15 @@ export default function App() {
 function Notification() {
   const urlPrefix = `https://explorer.${networkId}.near.org/accounts`
   return (
-    <aside>
-      <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.accountId}`}>
-        {window.accountId}
-      </a>
-      {' '/* React trims whitespace around tags; insert literal space character when needed */}
-     
-      {' '}
-      <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.contract.contractId}`}>
-        {window.contract.contractId}
-      </a>
-      <footer>
-        <div>✔ Succeeded</div>
-        <div>Just now</div>
-      </footer>
-    </aside>
+    <div>
+      <p style={{ textAlign: "center" }}>
+                You have successfully minted yourself a NFT! see it  {" "}
+                <a href={"https://wallet.testnet.near.org/?tab=collectibles"}>
+                  here 
+                </a>
+                {" "} on collectibles tabs on your NEAR wallet! :)
+      </p>
+      
+    </div>
   )
 }
