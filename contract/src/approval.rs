@@ -1,7 +1,7 @@
 use crate::*;
 use near_sdk::{ext_contract, Gas};
 
-const GAS_FOR_NFT_APPROVE: Gas = 10_000_000_000_000;
+const GAS_FOR_NFT_APPROVE: Gas = Gas(10_000_000_000_000);
 const NO_DEPOSIT: Balance = 0;
 
 pub trait NonFungibleTokenCore {

@@ -79,7 +79,7 @@ export default function App() {
               borderBottom: '2px solid var(--secondary)'
             }}
           >
-            Welcome
+            Hello!
           </label>
           {' '/* React trims whitespace around tags; insert literal space character when needed */}
           {window.accountId}!
@@ -104,7 +104,7 @@ export default function App() {
                   title: "NEAR SPRING NFT",
                   description: "NEAR Spring Challenge 3 NFT :)",
                   media:
-                    "https://bafkreifdhr7zejvzp2gls3dh53a4fwu6hjbio3k6k2ithcllovop2oykhq.ipfs.nftstorage.link/",
+                    "https://nftnewspro.com/wp-content/uploads/2022/03/Disaster-Girl.jpg",
                 },
                 receiver_id: window.accountId,
               },
@@ -135,11 +135,11 @@ export default function App() {
           }, 11000)
         }}>
           <fieldset id="fieldset">
-            <h4
-              
+           { !showNotification && <p
+              style={{ display: 'flex', alignContent: 'center', justifyContent:'center' }}
             >
-              Click the Below Button to MINT YOUR NFT
-            </h4>
+             Click "Mint" below to Mint Your NFT meme
+            </p> }
             <div style={{ display: 'flex', alignContent: 'center', justifyContent:'center' }}>
               
               <button
@@ -164,11 +164,11 @@ function Notification() {
   return (
     <div>
       <p style={{ textAlign: "center" }}>
-                You have successfully minted yourself a NFT! see it  {" "}
+                You have successfully minted yourself a NFT! see it on collectibles tabs on your {" "}
                 <a href={"https://wallet.testnet.near.org/?tab=collectibles"}>
-                  here 
+                NEAR wallet! 
                 </a>
-                {" "} on collectibles tabs on your NEAR wallet! :)
+                {" "} :)
       </p>
       
     </div>
